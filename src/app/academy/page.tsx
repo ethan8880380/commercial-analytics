@@ -1,58 +1,51 @@
-"use client"
-
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Header } from "@/app/academy/academy-components/header";
 import Hero from "@/app/academy/academy-components/hero";
+import { getAcademyData } from '@/utils/excel';
+import { Suspense } from 'react';
 
-export default function AcademyPage() {
+// This is a Server Component
+export default async function AcademyPage() {
+  // Fetch academy data from Excel
+  const academyData = await getAcademyData();
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <Header />
-      <Hero />
+      <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading hero section...</div>}>
+        <Hero heroContent={academyData.heroContent} />
+      </Suspense>
 
-      
-
-      {/* Features Section */}
+      {/* Analytics Framework Courses Section */}
       <section id="courses" className="py-20 bg-secondary/30">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl font-semibold text-center mb-12">Featured Courses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Data Analytics Fundamentals",
-                description: "Learn the core concepts of data analysis and visualization.",
-                level: "Beginner",
-                duration: "8 weeks"
-              },
-              {
-                title: "Advanced Business Intelligence",
-                description: "Master dashboard creation and business reporting techniques.",
-                level: "Intermediate",
-                duration: "10 weeks"
-              },
-              {
-                title: "Predictive Analytics Mastery",
-                description: "Implement machine learning models for business forecasting.",
-                level: "Advanced",
-                duration: "12 weeks"
-              }
-            ].map((course, index) => (
-              <div key={index} className="bg-card rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-xl font-medium mb-3">{course.title}</h3>
-                <p className="text-muted-foreground mb-4">{course.description}</p>
-                <div className="flex justify-between text-sm">
-                  <span className="bg-primary/10 text-primary px-2 py-1 rounded">{course.level}</span>
-                  <span>{course.duration}</span>
+          <h2 className="text-3xl font-semibold text-center mb-12">Analytics Framework Courses</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {academyData.courses.map((course) => (
+              <div key={course.id} className="bg-card rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-xl font-medium">{course.title}</h3>
+                  {course.section && (
+                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                      {course.section}
+                    </span>
+                  )}
                 </div>
-                <Button className="w-full mt-6" variant="outline">View Details</Button>
+                <p className="text-muted-foreground mb-4">{course.description}</p>
+                <div className="flex justify-between text-sm mt-4">
+                  <span className="bg-primary/10 text-primary px-2 py-1 rounded">{course.knowledgeZone || "Framework"}</span>
+                  <Button className="ml-auto" variant="outline" size="sm">View Details</Button>
+                </div>
               </div>
             ))}
           </div>
           <div className="text-center mt-12">
-            <Button size="lg">View All Courses</Button>
+            <Button size="lg" asChild>
+              <a href="/academy/all-trainings">View All Trainings</a>
+            </Button>
           </div>
         </div>
       </section>

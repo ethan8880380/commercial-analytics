@@ -57,7 +57,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       variant="outline"
       size="icon"
       onClick={toggleTheme}
-      className={cn("", className)}
+      className={cn("bg-background/60 backdrop-blur-sm border-border/50", className)}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} theme`}
     >
       {theme === "light" ? (
