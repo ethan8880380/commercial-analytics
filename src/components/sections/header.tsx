@@ -15,22 +15,22 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
+import { Sparkles, GraduationCap } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const gettingStartedLinks = [
   {
-    title: "All Dashboards",
+    title: "Office Hour Demos",
     href: "/docs",
     description: "Re-usable components built using Radix UI and Tailwind CSS."
   },
   {
-    title: "All Dashboards", 
+    title: "Recorded Trainings", 
     href: "/docs/installation",
     description: "How to install dependencies and structure your app."
   },
   {
-    title: "All Dashboards",
+    title: "Office Hour Schedule",
     href: "/docs/primitives/typography", 
     description: "Styles for headings, paragraphs, lists...etc"
   }
@@ -108,22 +108,21 @@ export function Header() {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-          <NavigationMenuTrigger>Dashboards</NavigationMenuTrigger>
+          <NavigationMenuTrigger>Training</NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-3 p-3 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
                   <a
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/40 to-primary hover:bg-primary p-6 no-underline outline-none focus:shadow-md transition-colors duration-500 transition-ease-in"
-                    href="/"
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-green-500/40 to-primary hover:bg-primary p-6 no-underline outline-none focus:shadow-md transition-colors duration-500 transition-ease-in"
+                    href="/academy"
                   >
-                    <Icons.logo className="size-6 text-background   " />
-                    <div className="mb-2 mt-4 text-lg text-background font-medium">
-                      Consumption Navigator
+                    <GraduationCap className="h-8 w-8 text-background" />
+                    <div className="mb-2 mt-2 text-lg text-background font-medium">
+                      Analytics Academy
                     </div>
                     <p className="text-sm leading-tight text-background/80">
-                      Beautifully designed components built with Radix UI and
-                      Tailwind CSS.
+                      Our new training platform that has everything you need to know about analytics.
                     </p>
                   </a>
                 </NavigationMenuLink>

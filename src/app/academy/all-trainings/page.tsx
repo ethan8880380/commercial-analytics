@@ -89,11 +89,43 @@ export default function AllTrainingsPage() {
           zoneDescriptions[zone] = `Explore ${courseCount} training courses in the ${zone} knowledge area.`;
         });
         
+        // Check for tab in URL query params
+        const searchParams = new URLSearchParams(window.location.search);
+        const tabParam = searchParams.get('tab');
+        
+        // Find closest matching tab
+        let selectedZone = knowledgeZones[0]; // Default to first tab
+        
+        if (tabParam) {
+          // Find exact match
+          const exactMatch = knowledgeZones.find(zone => zone === tabParam);
+          if (exactMatch) {
+            selectedZone = exactMatch;
+          } else {
+            // Try to find a case-insensitive match
+            const caseInsensitiveMatch = knowledgeZones.find(
+              zone => zone.toLowerCase() === tabParam.toLowerCase()
+            );
+            if (caseInsensitiveMatch) {
+              selectedZone = caseInsensitiveMatch;
+            } else {
+              // Try to find closest partial match
+              const partialMatch = knowledgeZones.find(
+                zone => zone.toLowerCase().includes(tabParam.toLowerCase()) || 
+                       tabParam.toLowerCase().includes(zone.toLowerCase())
+              );
+              if (partialMatch) {
+                selectedZone = partialMatch;
+              }
+            }
+          }
+        }
+        
         setAcademyData({
           courses,
           coursesByZone,
           knowledgeZones,
-          selectedZone: knowledgeZones[0],
+          selectedZone,
           zoneDescriptions
         });
       } catch (error) {
@@ -102,14 +134,40 @@ export default function AllTrainingsPage() {
     }
     
     loadData();
+    
+    // Update URL when tab changes
+    const handlePopState = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const tabParam = searchParams.get('tab');
+      
+      if (tabParam && academyData.knowledgeZones.includes(tabParam)) {
+        setAcademyData(prev => ({
+          ...prev,
+          selectedZone: tabParam
+        }));
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Handle tab change
+  // Handle tab change and update URL
   const handleTabChange = (value: string) => {
+    // Update state
     setAcademyData(prev => ({
       ...prev,
       selectedZone: value
     }));
+    
+    // Update URL without navigating
+    const url = new URL(window.location.href);
+    if (value === "All") {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', value);
+    }
+    window.history.pushState({}, '', url);
   };
 
   // Group courses by section for a given knowledge zone

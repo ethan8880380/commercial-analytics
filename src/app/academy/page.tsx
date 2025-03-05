@@ -5,6 +5,7 @@ import { Header } from "@/app/academy/academy-components/header";
 import Hero from "@/app/academy/academy-components/hero";
 import { getAcademyData } from '@/utils/excel';
 import { Suspense } from 'react';
+import { Layout417 } from "@/app/academy/academy-components/knowledge-areas";
 
 // This is a Server Component
 export default async function AcademyPage() {
@@ -18,6 +19,7 @@ export default async function AcademyPage() {
       <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading hero section...</div>}>
         <Hero heroContent={academyData.heroContent} />
       </Suspense>
+      <Layout417 />
 
       {/* Analytics Framework Courses Section */}
       <section id="courses" className="py-20 bg-secondary/30">
