@@ -16,6 +16,16 @@ export interface AcademyCourse {
   knowledgeZone?: string;
 }
 
+// Define interface for Excel row data
+interface ExcelRowData {
+  Title?: string;
+  Name?: string;
+  Description?: string;
+  'Knowledge zone'?: string;
+  Section?: string;
+  [key: string]: unknown | string | number; // For any other properties that might exist
+}
+
 // This is a server-only function
 export async function getAcademyData(): Promise<{
   courses: AcademyCourse[];
@@ -43,11 +53,11 @@ export async function getAcademyData(): Promise<{
     }
     
     // Convert to JSON
-    const rawData = XLSX.utils.sheet_to_json(worksheet);
+    const rawData = XLSX.utils.sheet_to_json(worksheet) as ExcelRowData[];
     console.log('Raw Excel data:', rawData);
     
     // Map the raw data to our courses format
-    const coursesData = rawData.map((row: any, index) => ({
+    const coursesData = rawData.map((row: ExcelRowData, index) => ({
       id: index.toString(),
       title: row['Title'] || row['Name'] || '',
       description: row['Description'] || '',

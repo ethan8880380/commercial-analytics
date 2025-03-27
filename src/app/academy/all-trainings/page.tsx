@@ -3,21 +3,42 @@
 import { useEffect, useState, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/app/academy/academy-components/header";
-import { getAcademyData } from '@/utils/excel';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import "./tabs.css"; // Import the custom CSS
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CTA } from "@/app/academy/academy-components/cta";
+import Link from 'next/link';
+import Image from 'next/image';
+import { ViewedBadge } from './components/viewed-badge';
 // Define section order for consistent sorting
 const SECTION_ORDER = ["Professional", "Specialty", "Expert"];
 
-// Tab transition configuration
-const transition = {
-  type: "tween",
-  ease: "easeOut",
-  duration: 0.15,
+// Function to convert a string to slug format
+function createSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+// Function to determine badge variant based on section name
+const getBadgeVariantForSection = (section: string): "default" | "secondary" | "destructive" | "outline" | "purple" | "yellow" | "green" | "red" => {
+  const normalizedSection = section.toLowerCase().trim();
+  
+  if (normalizedSection.includes("professional")) {
+    return "green"; // Primary color (blue)
+  } else if (normalizedSection.includes("specialty")) {
+    return "red"; // Secondary color
+  } else if (normalizedSection.includes("expert")) {
+    return "yellow"; // Destructive color (red/orange)
+  }
+  
+  // Default fallback
+  return "outline";
 };
 
 // At the top of your file
@@ -31,8 +52,8 @@ interface Course {
 
 export default function AllTrainingsPage() {
   const [academyData, setAcademyData] = useState<{
-    courses: any[];
-    coursesByZone: Record<string, any[]>;
+    courses: Course[];
+    coursesByZone: Record<string, Course[]>;
     knowledgeZones: string[];
     selectedZone: string;
     zoneDescriptions: Record<string, string>;
@@ -44,15 +65,15 @@ export default function AllTrainingsPage() {
     zoneDescriptions: {}
   });
 
+  const [sectionFilter, setSectionFilter] = useState<string>("All");
   const tabsRef = useRef<HTMLDivElement>(null);
-  const [hoveredTab, setHoveredTab] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
       try {
         // Fetch data from API
-        const response = await fetch('/api/academy');
-        if (!response.ok) throw new Error('Failed to load courses');
+        const response = await fetch("/api/academy");
+        if (!response.ok) throw new Error("Failed to load courses");
         const data = await response.json();
         
         const courses = data.courses || [];
@@ -61,29 +82,29 @@ export default function AllTrainingsPage() {
         const allCourses = [...courses];
         
         // Group courses by knowledge zone
-        const coursesByZone: Record<string, any[]> = {
-          All: allCourses
+        const coursesByZone: Record<string, Course[]> = {
+          "All Trainings": allCourses
         };
         
         courses.forEach((course: Course) => {
-          const zone = course.knowledgeZone || 'Other';
+          const zone = course.knowledgeZone || "Other";
           if (!coursesByZone[zone]) {
             coursesByZone[zone] = [];
           }
           coursesByZone[zone].push(course);
         });
         
-        // Get unique knowledge zones, sorted alphabetically, with "All" first
-        const knowledgeZones = ["All", ...Object.keys(coursesByZone).filter(zone => zone !== "All").sort()];
+        // Get unique knowledge zones, sorted alphabetically, with "All Trainings" first
+        const knowledgeZones = ["All Trainings", ...Object.keys(coursesByZone).filter(zone => zone !== "All Trainings").sort()];
         
         // Create descriptions for each zone
         const zoneDescriptions: Record<string, string> = {
-          All: "Browse our complete catalog of analytics training courses across all knowledge areas.",
+          "All Trainings": "Browse our complete catalog of analytics training courses across all knowledge areas.",
         };
         
         // Generate descriptions for each zone based on the number of courses
         knowledgeZones.forEach(zone => {
-          if (zone === 'All') return; // Skip All as we already defined it
+          if (zone === "All Trainings") return; // Skip All Trainings as we already defined it
           
           const courseCount = coursesByZone[zone]?.length || 0;
           zoneDescriptions[zone] = `Explore ${courseCount} training courses in the ${zone} knowledge area.`;
@@ -91,7 +112,7 @@ export default function AllTrainingsPage() {
         
         // Check for tab in URL query params
         const searchParams = new URLSearchParams(window.location.search);
-        const tabParam = searchParams.get('tab');
+        const tabParam = searchParams.get("tab");
         
         // Find closest matching tab
         let selectedZone = knowledgeZones[0]; // Default to first tab
@@ -129,7 +150,7 @@ export default function AllTrainingsPage() {
           zoneDescriptions
         });
       } catch (error) {
-        console.error('Error loading academy data:', error);
+        console.error("Error loading academy data:", error);
       }
     }
     
@@ -138,7 +159,7 @@ export default function AllTrainingsPage() {
     // Update URL when tab changes
     const handlePopState = () => {
       const searchParams = new URLSearchParams(window.location.search);
-      const tabParam = searchParams.get('tab');
+      const tabParam = searchParams.get("tab");
       
       if (tabParam && academyData.knowledgeZones.includes(tabParam)) {
         setAcademyData(prev => ({
@@ -148,9 +169,9 @@ export default function AllTrainingsPage() {
       }
     };
     
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [academyData.knowledgeZones]);
 
   // Handle tab change and update URL
   const handleTabChange = (value: string) => {
@@ -162,243 +183,223 @@ export default function AllTrainingsPage() {
     
     // Update URL without navigating
     const url = new URL(window.location.href);
-    if (value === "All") {
-      url.searchParams.delete('tab');
+    if (value === "All Trainings") {
+      url.searchParams.delete("tab");
     } else {
-      url.searchParams.set('tab', value);
+      url.searchParams.set("tab", value);
     }
-    window.history.pushState({}, '', url);
+    window.history.pushState({}, "", url);
+  };
+
+  // Handle section filter change
+  const handleSectionFilterChange = (value: string) => {
+    setSectionFilter(value);
   };
 
   // Group courses by section for a given knowledge zone
   const getCoursesBySection = (zone: string) => {
     const courses = academyData.coursesByZone[zone] || [];
     
-    // Group by section
-    const coursesBySection: Record<string, any[]> = {};
+    // Create a normalized mapping to standard section names
+    const sectionMapping: Record<string, string> = {};
+    
+    // Pre-populate with standard names (case-insensitive)
+    SECTION_ORDER.forEach(standardSection => {
+      sectionMapping[standardSection.toLowerCase().trim()] = standardSection;
+    });
+    
+    // Group by section with strict normalization
+    const coursesBySection: Record<string, Course[]> = {};
     
     courses.forEach(course => {
-      const section = course.section || 'Other';
-      if (!coursesBySection[section]) {
-        coursesBySection[section] = [];
+      // Default to "Other" if no section is provided
+      const rawSection = (course.section || "Other").trim();
+      
+      // Determine the normalized section name
+      let normalizedSection: string;
+      
+      // Check for case-insensitive match with standard sections
+      const lookupKey = rawSection.toLowerCase().trim();
+      if (sectionMapping[lookupKey]) {
+        normalizedSection = sectionMapping[lookupKey];
+      } else {
+        // If not a standard section, keep original but ensure consistent casing for duplicates
+        normalizedSection = rawSection.charAt(0).toUpperCase() + rawSection.slice(1);
+        // Remember this normalization for future consistency
+        sectionMapping[lookupKey] = normalizedSection;
       }
-      coursesBySection[section].push(course);
+      
+      // Initialize array if this is the first course for this section
+      if (!coursesBySection[normalizedSection]) {
+        coursesBySection[normalizedSection] = [];
+      }
+      
+      coursesBySection[normalizedSection].push(course);
     });
     
     return coursesBySection;
   };
 
-  // Move the updateSlider function definition to component scope, before the return statement
-  const updateSlider = () => {
-    const tabsList = document.querySelector('.vercel-tabs [role="tablist"]') as HTMLElement;
-    const activeTab = document.querySelector('.vercel-tabs [role="tab"][data-state="active"]') as HTMLElement;
-    
-    if (tabsList && activeTab) {
-      const { offsetLeft, offsetWidth } = activeTab;
-      tabsList.style.setProperty('--tab-left', `${offsetLeft}px`);
-      tabsList.style.setProperty('--tab-width', `${offsetWidth}px`);
+  // Filter sections based on the section filter
+  const getFilteredSections = (coursesBySection: Record<string, Course[]>) => {
+    // If "All" is selected, show everything
+    if (sectionFilter === "All") {
+      return coursesBySection;
     }
-  };
-
-  // Keep your existing useEffect, but reference the function defined above
-  useEffect(() => {
-    // Initial update
-    updateSlider();
     
-    // Create a mutation observer to watch for attribute changes on tabs
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'data-state') {
-          updateSlider();
+    // Create a filtered copy
+    const filteredSections: Record<string, Course[]> = {};
+    
+    // Find all courses that match the filter (case-insensitive)
+    Object.entries(coursesBySection).forEach(([section, courses]) => {
+      // Check if the section name matches our filter
+      if (section.toLowerCase() === sectionFilter.toLowerCase()) {
+        filteredSections[section] = courses;
+      } 
+      // If section doesn't match, check individual courses for matching section property
+      else {
+        const matchingCourses = courses.filter(
+          course => course.section && course.section.toLowerCase() === sectionFilter.toLowerCase()
+        );
+        
+        if (matchingCourses.length > 0) {
+          // If we found matching courses, add them under their original section
+          if (!filteredSections[section]) {
+            filteredSections[section] = [];
+          }
+          filteredSections[section].push(...matchingCourses);
         }
-      });
+      }
     });
     
-    // Start observing
-    const tabs = document.querySelectorAll('.vercel-tabs [role="tab"]');
-    tabs.forEach(tab => {
-      observer.observe(tab, { attributes: true });
-    });
-    
-    // Handle window resize
-    window.addEventListener('resize', updateSlider);
-    
-    // Cleanup
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', updateSlider);
-    };
-  }, [academyData.knowledgeZones]); // Re-run when tabs change
+    return filteredSections;
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
       <section className="py-16 px-6">
-        <div className="max-w-7xl mx-auto">
+        <div className="">
           {academyData.knowledgeZones.length > 0 && (
-            <Tabs 
-              ref={tabsRef}
-              defaultValue={academyData.knowledgeZones[0]} 
-              value={academyData.selectedZone}
-              className="w-full vercel-tabs rounded-none"
-              onValueChange={handleTabChange}
-            >
-              <div className="relative mb-8">
-                <TabsList className="bg-transparent justify-start border-b border-border pb-0 rounded-none">
-                  <LayoutGroup>
-                    <AnimatePresence>
-                      {hoveredTab && (
-                        <motion.div
-                          layoutId="hoverBackground"
-                          className="absolute rounded-md bg-accent"
-                          initial={{ opacity: 0 }}
-                          animate={{ 
-                            opacity: 1,
-                            width: (document.querySelector(`[data-tab-value="${hoveredTab}"]`)?.getBoundingClientRect().width || 0) - 16,
-                            x: (document.querySelector(`[data-tab-value="${hoveredTab}"]`)?.getBoundingClientRect().x || 0) - 
-                               (document.querySelector('.vercel-tabs [role="tablist"]')?.getBoundingClientRect().x || 0) + 4
-                          }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                          style={{ 
-                            zIndex: 0,
-                            height: 'calc(100% - 12px)',
-                            borderRadius: '4px',
-                            top: '4px',
-                            bottom: '12px'
-                          }}
-                        />
-                      )}
-                    </AnimatePresence>
+            <>
+              {/* Hero Section - Moved Above Tabs */}
+              <div className="mb-12 grid grid-cols-1 md:grid-cols-2 items-start gap-8">
+                <div className="flex flex-col gap-4 w-full h-full justify-center">
+                  <h2 className="text-3xl font-bold mb-2">{academyData.selectedZone} Courses</h2>
+                  <p className="text-muted-foreground">
+                    {academyData.zoneDescriptions[academyData.selectedZone] || ''}
+                  </p>
+                </div>
+                <div className="w-full md:w-auto flex justify-center">
+                  <Image
+                    src="/hero.jpg"
+                    alt="Training Image"
+                    width={800}
+                    height={600}
+                    className="object-cover h-[30vh]"
+                  />
+                </div>
+              </div>
 
+              {/* Tabs Section */}
+              <Tabs 
+                ref={tabsRef}
+                defaultValue={academyData.knowledgeZones[0]} 
+                value={academyData.selectedZone}
+                className="w-full"
+                onValueChange={handleTabChange}
+              >
+                <div className="mb-8 flex justify-between items-center">
+                  <TabsList>
                     {academyData.knowledgeZones.map(zone => (
-                      <div key={zone} className="relative z-10">
-                        <TabsTrigger 
-                          value={zone}
-                          className="h-12 relative z-10 data-[state=active]:border-b-0 text-sm font-medium"
-                          data-tab-value={zone}
-                          onMouseEnter={() => setHoveredTab(zone)}
-                          onMouseLeave={() => setHoveredTab(null)}
-                        >
-                          {zone}
-                        </TabsTrigger>
-                        
-                        {academyData.selectedZone === zone && (
-                          <motion.div
-                            layoutId="activeIndicator"
-                            className="absolute bottom-0 left-0 right-0 h-[3px] bg-primary"
-                            transition={{ duration: 0.2 }}
-                            style={{ zIndex: 30 }}
-                          />
-                        )}
-                      </div>
+                      <TabsTrigger 
+                        key={zone}
+                        value={zone}
+                      >
+                        {zone}
+                      </TabsTrigger>
                     ))}
-                  </LayoutGroup>
-                </TabsList>
-              </div>
-              
-              <div className="mb-16">
-                <h1 className="text-4xl font-bold mb-3">{academyData.selectedZone} Trainings</h1>
-                <p className="text-lg text-muted-foreground max-w-3xl">
-                  {academyData.zoneDescriptions[academyData.selectedZone] || 
-                   'Browse our catalog of analytics training courses.'}
-                </p>
-              </div>
-              
-              {academyData.knowledgeZones.map(zone => {
-                const coursesBySection = getCoursesBySection(zone);
-                
-                return (
-                  <TabsContent key={zone} value={zone} className="mt-0 animate-in fade-in-50 duration-300">
-                    {SECTION_ORDER.map(sectionName => {
-                      const coursesInSection = coursesBySection[sectionName] || [];
-                      
-                      if (coursesInSection.length === 0) return null;
-                      
-                      return (
-                        <div key={sectionName} className="mb-24">
-                          <h2 className="text-2xl font-semibold mb-8 pb-2 border-b">{sectionName}</h2>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {coursesInSection.map(course => (
-                              <Card key={course.id} className="h-full flex flex-col hover:shadow-md transition-shadow">
-                                <CardHeader className="pb-2">
-                                  <div className="flex justify-between items-start gap-4">
-                                    <CardTitle className="text-xl leading-tight">{course.title}</CardTitle>
-                                    {course.section && (
-                                      <Badge variant="outline" className="whitespace-nowrap">{course.section}</Badge>
-                                    )}
+                  </TabsList>
+                  
+                  <div className="flex items-center gap-2">
+                    <Select value={sectionFilter} onValueChange={handleSectionFilterChange}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All Levels</SelectItem>
+                        {SECTION_ORDER.map(section => (
+                          <SelectItem key={section} value={section}>{section}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {academyData.knowledgeZones.map(zone => (
+                  <TabsContent key={zone} value={zone}>
+                    {/* Course sections */}
+                    {Object.entries(getFilteredSections(getCoursesBySection(zone)))
+                      .sort(([a], [b]) => {
+                        const aIndex = SECTION_ORDER.indexOf(a);
+                        const bIndex = SECTION_ORDER.indexOf(b);
+                        
+                        // If both sections are in the order array, sort by their position
+                        if (aIndex !== -1 && bIndex !== -1) {
+                          return aIndex - bIndex;
+                        }
+                        
+                        // If only one section is in the order array, prioritize it
+                        if (aIndex !== -1) return -1;
+                        if (bIndex !== -1) return 1;
+                        
+                        // Otherwise, sort alphabetically
+                        return a.localeCompare(b);
+                      })
+                      .map(([section, courses]) => (
+                        <div key={section} className="mb-12">
+                          <h3 className="text-xl font-semibold mb-4">{section}</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {courses.map((course: Course) => (
+                              <Card key={course.id} className="h-full flex flex-col">
+                                <CardHeader>
+                                  <div>
+                                    <div className="flex flex-wrap gap-2 mb-6">
+                                      {course.section && (
+                                        <Badge 
+                                          variant={getBadgeVariantForSection(course.section)} 
+                                          className="text-sm"
+                                        >
+                                          {course.section}
+                                        </Badge>
+                                      )}
+                                      <ViewedBadge courseId={course.id} />
+                                    </div>
+                                    <CardTitle className="text-lg">{course.title}</CardTitle>
                                   </div>
-                                  {course.knowledgeZone && (
-                                    <CardDescription className="mt-1">{course.knowledgeZone}</CardDescription>
-                                  )}
+                                  <CardDescription className="mt-2">
+                                    {course.description}
+                                  </CardDescription>
                                 </CardHeader>
-                                <CardContent className="flex-grow py-4">
-                                  <p className="text-sm text-muted-foreground">{course.description}</p>
-                                </CardContent>
-                                <CardFooter className="pt-2 pb-4 flex justify-end">
-                                  <Button variant="outline" size="sm">View Details</Button>
+                                <CardFooter className="mt-auto pt-4">
+                                  <Link href={`/academy/training/${createSlug(course.title)}`}>
+                                    <Button className="w-full">View Course</Button>
+                                  </Link>
                                 </CardFooter>
                               </Card>
                             ))}
                           </div>
                         </div>
-                      );
-                    })}
-                    
-                    {Object.keys(coursesBySection)
-                      .filter(section => !SECTION_ORDER.includes(section))
-                      .map(sectionName => {
-                        const coursesInSection = coursesBySection[sectionName];
-                        
-                        return (
-                          <div key={sectionName} className="mb-24">
-                            <h2 className="text-2xl font-semibold mb-8 pb-2 border-b">{sectionName}</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                              {coursesInSection.map(course => (
-                                <Card key={course.id} className="h-full flex flex-col hover:shadow-md transition-shadow">
-                                  <CardHeader className="pb-2">
-                                    <div className="flex justify-between items-start gap-4">
-                                      <CardTitle className="text-xl leading-tight">{course.title}</CardTitle>
-                                      {course.section && (
-                                        <Badge variant="outline" className="whitespace-nowrap">{course.section}</Badge>
-                                      )}
-                                    </div>
-                                    {course.knowledgeZone && (
-                                      <CardDescription className="mt-1">{course.knowledgeZone}</CardDescription>
-                                    )}
-                                  </CardHeader>
-                                  <CardContent className="flex-grow py-4">
-                                    <p className="text-sm text-muted-foreground">{course.description}</p>
-                                  </CardContent>
-                                  <CardFooter className="pt-2 pb-4 flex justify-end">
-                                    <Button variant="outline" size="sm">View Details</Button>
-                                  </CardFooter>
-                                </Card>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    
-                    {Object.keys(coursesBySection).length === 0 && (
-                      <div className="text-center py-16">
-                        <p className="text-muted-foreground">No courses found in this category.</p>
-                      </div>
-                    )}
+                      ))}
                   </TabsContent>
-                );
-              })}
-            </Tabs>
-          )}
-          
-          {academyData.knowledgeZones.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">Loading courses...</p>
-            </div>
+                ))}
+              </Tabs>
+            </>
           )}
         </div>
       </section>
+      <CTA />
     </div>
   );
 } 

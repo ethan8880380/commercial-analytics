@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 import { cn } from "@/lib/utils"
 import { Icons } from "@/components/icons"
@@ -15,7 +16,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Button } from "@/components/ui/button"
-import { Sparkles } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const gettingStartedLinks = [
@@ -81,7 +81,7 @@ const mainLinks = [
   },
   {
     title: "Back to Hub",
-    href: "/docss"
+    href: "/"
   }
 ]
 
@@ -92,8 +92,8 @@ export function Header() {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 20)
     }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (
@@ -101,7 +101,7 @@ export function Header() {
       "sticky top-0 z-50 flex justify-between items-center px-6 py-4 bg-background/70 backdrop-blur transition-all duration-200"
     )}>
       <div className="flex items-center gap-4">
-        <img src="/logo.svg" alt="Commercial Analytics" className="size-6" />
+        <Image src="/logo.svg" alt="Commercial Analytics" width={24} height={24} className="size-6" />
         <div className="text-lg font-semibold">Commercial Academy</div>
       </div>
       <div className="flex items-center gap-4">
@@ -113,11 +113,11 @@ export function Header() {
             <ul className="grid gap-3 p-3 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
-                  <a
+                  <Link
                     className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/40 to-primary hover:bg-primary p-6 no-underline outline-none focus:shadow-md transition-colors duration-500 transition-ease-in"
                     href="/"
                   >
-                    <Icons.logo className="size-6 text-background   " />
+                    <Icons.logo className="size-6 text-background" />
                     <div className="mb-2 mt-4 text-lg text-background font-medium">
                       Consumption Navigator
                     </div>
@@ -125,7 +125,7 @@ export function Header() {
                       Beautifully designed components built with Radix UI and
                       Tailwind CSS.
                     </p>
-                  </a>
+                  </Link>
                 </NavigationMenuLink>
               </li>
               {gettingStartedLinks.map((link) => (
@@ -165,6 +165,9 @@ export function Header() {
       </NavigationMenu>
       <div className="flex items-center gap-3">
         <ThemeToggle />
+        <Link href="/chat">
+          <Button variant="outline">Chatbot Test</Button>
+        </Link>
         <Button variant="default">Request Access</Button>
       </div>
       </div>

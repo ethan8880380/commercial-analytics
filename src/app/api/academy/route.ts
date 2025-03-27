@@ -3,6 +3,16 @@ import * as XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
 
+// Define an interface for the Excel row data
+interface ExcelRowData {
+  'Title'?: string;
+  'Name'?: string;
+  'Description'?: string;
+  'Knowledge zone'?: string;
+  'Section'?: string;
+  [key: string]: unknown | string | number; // For any other properties that might exist
+}
+
 export async function GET() {
   try {
     const filePath = path.join(process.cwd(), 'public', 'data', 'academy.xlsx');
@@ -19,10 +29,10 @@ export async function GET() {
     }
     
     // Convert to JSON
-    const rawData = XLSX.utils.sheet_to_json(worksheet);
+    const rawData = XLSX.utils.sheet_to_json(worksheet) as ExcelRowData[];
     
     // Map the raw data to our courses format
-    const coursesData = rawData.map((row: any, index) => ({
+    const coursesData = rawData.map((row: ExcelRowData, index) => ({
       id: index.toString(),
       title: row['Title'] || row['Name'] || '',
       description: row['Description'] || '',

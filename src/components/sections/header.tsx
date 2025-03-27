@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 import { cn } from "@/lib/utils"
-import { Icons } from "@/components/icons"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -15,7 +15,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Button } from "@/components/ui/button"
-import { Sparkles, GraduationCap } from "lucide-react"
+import { GraduationCap } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 const gettingStartedLinks = [
@@ -92,8 +92,8 @@ export function Header() {
     const handleScroll = () => {
       setHasScrolled(window.scrollY > 20)
     }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   return (
@@ -101,7 +101,13 @@ export function Header() {
       "sticky top-0 z-50 flex justify-between items-center px-6 py-4 bg-background/70 backdrop-blur transition-all duration-200"
     )}>
       <div className="flex items-center gap-4">
-        <img src="/logo.svg" alt="Commercial Analytics" className="size-6" />
+        <Image 
+          src="/logo.svg" 
+          alt="Commercial Analytics" 
+          width={24} 
+          height={24} 
+          className="size-6" 
+        />
         <div className="text-lg font-semibold">Commercial Analytics</div>
       </div>
       <div className="flex items-center gap-4">
@@ -114,11 +120,11 @@ export function Header() {
               <li className="row-span-3">
                 <NavigationMenuLink asChild>
                   <a
-                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-green-500/40 to-primary hover:bg-primary p-6 no-underline outline-none focus:shadow-md transition-colors duration-500 transition-ease-in"
+                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-primary hover:bg-primary/70 p-6 no-underline outline-none focus:shadow-md transition-colors duration-500 transition-ease-in"
                     href="/academy"
                   >
-                    <GraduationCap className="h-8 w-8 text-background" />
-                    <div className="mb-2 mt-2 text-lg text-background font-medium">
+                    <GraduationCap className="size-6 text-background" />
+                    <div className="mb-2 mt-4 text-lg text-background font-medium">
                       Analytics Academy
                     </div>
                     <p className="text-sm leading-tight text-background/80">

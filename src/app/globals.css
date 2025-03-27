@@ -9,6 +9,36 @@
   --font-sans: "Outfit", sans-serif;
 }
 
+/* Custom Scrollbar Styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  border-radius: 20px;
+}
+
+/* Remove scrollbar arrows/buttons */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Remove scrollbar corner */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 /* Define animations directly */
 @keyframes fade-in {
   from { opacity: 0; }
@@ -38,6 +68,19 @@
 @keyframes slide-out-to-right {
   from { transform: translateX(0); opacity: 1; }
   to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Add keyframes for gradient animation */
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Add keyframes for shiny text animation */
+@keyframes shiny-text {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
 }
 
 /* Direct navigation menu animations */
@@ -110,13 +153,13 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.165 0.05 240);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
+  --card: oklch(0.165 0.05 240);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.145 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.55 0.45 240);
+  --primary: oklch(0.58 0.45 240);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -210,11 +253,11 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  
+
   html {
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
-  
+
   body {
     @apply bg-background text-foreground;
     text-size-adjust: 100%;
@@ -228,53 +271,64 @@
     animation-timing-function: ease-out;
     animation-fill-mode: both;
   }
-  
+
   .animate-out {
     animation-duration: 0.3s;
     animation-timing-function: ease-in;
     animation-fill-mode: both;
   }
-  
+
   .fade-in {
     animation-name: fade-in;
   }
-  
+
   .fade-out {
     animation-name: fade-out;
   }
-  
+
   .slide-in-from-left {
     animation-name: slide-in-from-left;
   }
-  
+
   .slide-in-from-right {
     animation-name: slide-in-from-right;
   }
-  
+
   .slide-out-to-left {
     animation-name: slide-out-to-left;
   }
-  
+
   .slide-out-to-right {
     animation-name: slide-out-to-right;
   }
   
+  /* Add utility class for gradient animation */
+  .animate-gradient {
+    animation: gradient 8s ease infinite;
+    background-size: 200% 200%;
+  }
+  
+  /* Add utility class for shiny text animation */
+  .animate-shiny-text {
+    animation: shiny-text 3s ease-in-out infinite;
+  }
+
   .duration-150 {
     animation-duration: 150ms;
   }
-  
+
   .duration-200 {
     animation-duration: 200ms;
   }
-  
+
   .duration-300 {
     animation-duration: 300ms;
   }
-  
+
   .duration-0 {
     animation-duration: 0ms;
   }
-  
+
   .invisible {
     visibility: hidden;
   }

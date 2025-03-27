@@ -14,6 +14,8 @@ import {
   Brain, 
   Search 
 } from "lucide-react";
+import * as React from "react";
+import Image from "next/image";
 
 type ImageProps = {
   src: string;
@@ -49,12 +51,24 @@ export const Layout417 = (props: Layout417Props) => {
       <div className="container">
         <div className="relative h-[300svh] lg:h-[300vh]">
           <div className="sticky top-0 grid h-svh grid-cols-1 content-center items-center justify-center px-[5%] md:flex md:content-normal md:px-0 lg:h-screen">
-            <div className="absolute bottom-auto left-0 right-0 top-0 flex w-full justify-center overflow-hidden pt-20 md:inset-auto md:pt-0">
-              <h1 className="whitespace-nowrap text-8xl font-medium sm:text-[5.5rem] md:text-[7.5rem] lg:text-[10rem] leading-[1.5]">
+            <div className="absolute bottom-auto left-0 right-0 top-0 flex w-full flex-col items-center justify-center overflow-hidden pt-12 md:inset-auto md:pt-0">
+              <div className="mb-4 md:mb-6 lg:mb-8">
+                <Image 
+                  src="/images/analytics-illustration.svg" 
+                  alt="Analytics Knowledge Hub" 
+                  width={192}
+                  height={192}
+                  className="w-32 h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-contain"
+                />
+              </div>
+              <h1 className="whitespace-nowrap text-7xl font-medium sm:text-[5rem] md:text-[6.5rem] lg:text-[8rem] leading-[1.2]">
                 {heading}
               </h1>
+              <p className="mt-4 max-w-2xl text-center text-muted-foreground text-lg md:text-xl">
+                Explore our knowledge areas to build your analytics expertise and drive business impact
+              </p>
             </div>
-            <div className="sticky top-0 mx-auto mt-12 flex min-h-[24.5rem] w-full max-w-sm flex-col items-center justify-center sm:mt-24 md:relative lg:mt-0">
+            <div className="sticky top-0 mx-auto mt-48 md:mt-56 lg:mt-64 flex min-h-[24.5rem] w-full max-w-sm flex-col items-center justify-center md:relative">
               {featureSections.map((section, index) => (
                 <FeatureSection
                   key={index}
@@ -142,7 +156,13 @@ const FeatureSection = ({
     >
       <div className="rb-6 mb-6 md:mb-8">
         {section.icon && typeof section.icon === 'object' && 'src' in section.icon ? (
-          <img src={section.icon.src} alt={section.icon.alt} className="size-12" />
+          <Image 
+            src={section.icon.src} 
+            alt={section.icon.alt || ""} 
+            width={48}
+            height={48}
+            className="size-12" 
+          />
         ) : (
           section.icon
         )}

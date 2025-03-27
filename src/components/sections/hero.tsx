@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 export function Hero() {
   return (
@@ -22,7 +23,13 @@ export function Hero() {
         </div>
       </div>
       <div className="mt-24">
-        <img src="/hero.jpg" alt="Hero Image" className="w-full h-full object-cover" />
+        <Image
+          src="/hero.jpg"
+          alt="Hero Image"
+          width={1200}
+          height={600}
+          className="w-full h-full object-cover"
+        />
       </div>
     </div>
   )
